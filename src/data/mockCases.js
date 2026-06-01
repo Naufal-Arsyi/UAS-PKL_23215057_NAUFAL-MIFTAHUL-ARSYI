@@ -5,9 +5,7 @@
  * @type {{
  *   id: string;
  *   company: string;
- *   contact: string;
  *   phone: string;
- *   location: string;
  *   date: string;
  *   symptoms: string[];
  *   diagnosis: string;
@@ -20,10 +18,8 @@
 export const MOCK_CASES = [
   {
     id: "NR-2026-001",
-    company: "PT Maju Bersama",
-    contact: "Hendra Kusuma",
+    company: "WiFi Main Office",
     phone: "081234567890",
-    location: "Gedung A Lt. 3 — Jl. Sudirman No. 45, Jakarta",
     date: "2026-05-25",
     symptoms: ["G01", "G08", "G03"],
     diagnosis: "Bandwidth penuh / overload pengguna",
@@ -34,10 +30,8 @@ export const MOCK_CASES = [
   },
   {
     id: "NR-2026-002",
-    company: "CV Teknologi Nusantara",
-    contact: "Sari Dewi",
+    company: "WiFi Branch Office",
     phone: "082345678901",
-    location: "Kantor Pusat Lt. 1 — Jl. Gatot Subroto, Bandung",
     date: "2026-05-24",
     symptoms: ["G06", "G04"],
     diagnosis: "Gangguan dari ISP",
@@ -48,10 +42,8 @@ export const MOCK_CASES = [
   },
   {
     id: "NR-2026-003",
-    company: "PT Solusi Digital",
-    contact: "Budi Santoso",
+    company: "WiFi Server Room",
     phone: "083456789012",
-    location: "Server Room — Jl. Pemuda No. 12, Surabaya",
     date: "2026-05-23",
     symptoms: ["G02", "G05"],
     diagnosis: "Access Point rusak",
@@ -62,10 +54,8 @@ export const MOCK_CASES = [
   },
   {
     id: "NR-2026-004",
-    company: "Universitas Harapan",
-    contact: "Dr. Anita Rahayu",
+    company: "WiFi Kampus",
     phone: "084567890123",
-    location: "Gedung Rektorat — Kampus Utama, Yogyakarta",
     date: "2026-05-22",
     symptoms: ["G04", "G10"],
     diagnosis: "DNS bermasalah",
@@ -76,10 +66,8 @@ export const MOCK_CASES = [
   },
   {
     id: "NR-2026-005",
-    company: "RS Medika Prima",
-    contact: "Ahmad Fauzi",
+    company: "WiFi Rumah Sakit",
     phone: "085678901234",
-    location: "Ruang Administrasi Lt. 2 — Jl. Kesehatan No. 8, Medan",
     date: "2026-05-25",
     symptoms: ["G02", "G06"],
     diagnosis: "Kabel LAN putus / longgar",

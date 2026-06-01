@@ -24,13 +24,13 @@ const DISPATCH_ICONS = {
 function buildUpdateMsg(c) {
   if (c.status === "in_progress") {
     return (
-      `Halo ${c.contact}, gangguan WiFi di ${c.company} sedang dalam penanganan kami. ` +
+      `Halo, gangguan WiFi di ${c.company} sedang dalam penanganan kami. ` +
       `Estimasi selesai: ${c.deadline}. ` +
       `Penyebab teridentifikasi: ${c.diagnosis}. Kami akan segera memberikan update. — NetReport`
     );
   }
   return (
-    `Halo ${c.contact}, gangguan WiFi di ${c.company} telah selesai ditangani. ` +
+    `Halo, gangguan WiFi di ${c.company} telah selesai ditangani. ` +
     `Mohon lakukan pengecekan dari sisi Anda. Hubungi kami jika masih ada masalah. — NetReport`
   );
 }
@@ -111,7 +111,7 @@ export default function Technician({ cases, onCaseUpdate, onLogout }) {
                       <div className="case-card-top">
                         <div>
                           <p className="case-company">{c.company}</p>
-                          <p className="case-meta">{c.id} · {c.contact} · {c.date}</p>
+                          <p className="case-meta">{c.id} · {c.date}</p>
                         </div>
                         <div className="case-badges">
                           <span className={`badge badge-${c.dispatch}`}>{dm.label}</span>
@@ -144,7 +144,7 @@ export default function Technician({ cases, onCaseUpdate, onLogout }) {
                   <div>
                     <p className="detail-company">{activeCase.company}</p>
                     <p className="detail-contact">
-                      {activeCase.contact} · {activeCase.phone} · {activeCase.date}
+                      {activeCase.phone} · {activeCase.date}
                     </p>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -186,14 +186,6 @@ export default function Technician({ cases, onCaseUpdate, onLogout }) {
                     ))}
                   </div>
                 </div>
-
-                {/* Location */}
-                {activeCase.location && (
-                  <div className="detail-section">
-                    <p className="label-caps detail-section-label text-muted">Lokasi</p>
-                    <p style={{ fontSize: 13, color: "var(--text-sub)" }}>{activeCase.location}</p>
-                  </div>
-                )}
 
                 {/* Deadline */}
                 <div className="detail-deadline">
@@ -255,7 +247,7 @@ export default function Technician({ cases, onCaseUpdate, onLogout }) {
               to: activeCase.phone,
               type: "template",
               message_template_id: "update_gangguan_wifi",
-              body: { params: [activeCase.contact, activeCase.diagnosis, activeCase.deadline] },
+              body: { params: [activeCase.diagnosis, activeCase.deadline] },
             }, null, 2)}</pre>
           </div>
 

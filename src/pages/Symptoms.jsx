@@ -100,28 +100,16 @@ export default function Symptoms({
         {/* Company / client info */}
         <div className="card company-form">
           <p className="company-form-title">Informasi Pelapor</p>
-          <div className="company-form-grid" style={{ marginBottom: 10 }}>
+          <div className="company-form-grid">
             <div style={{ position: "relative" }}>
-              <Building2 size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-faint)" }} />
-              <input className="input" style={{ paddingLeft: 30 }} placeholder="Nama Perusahaan"
+              <Wifi size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-faint)" }} />
+              <input className="input" style={{ paddingLeft: 30 }} placeholder="Nama WiFi"
                 value={company.name} onChange={(e) => setCompany({ ...company, name: e.target.value })} />
             </div>
-            <div style={{ position: "relative" }}>
-              <User size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-faint)" }} />
-              <input className="input" style={{ paddingLeft: 30 }} placeholder="Nama PIC / Kontak"
-                value={company.contact} onChange={(e) => setCompany({ ...company, contact: e.target.value })} />
-            </div>
-          </div>
-          <div className="company-form-grid">
             <div style={{ position: "relative" }}>
               <Phone size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-faint)" }} />
               <input className="input" style={{ paddingLeft: 30 }} placeholder="No. HP (WhatsApp)"
                 value={company.phone} onChange={(e) => setCompany({ ...company, phone: e.target.value })} />
-            </div>
-            <div style={{ position: "relative" }}>
-              <MapPin size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-faint)" }} />
-              <input className="input" style={{ paddingLeft: 30 }} placeholder="Lokasi / Gedung"
-                value={company.location} onChange={(e) => setCompany({ ...company, location: e.target.value })} />
             </div>
           </div>
         </div>

@@ -11,7 +11,7 @@ export default function App() {
 
   // ── Client form 
   const [company, setCompany] = useState({
-    name: "", contact: "", phone: "", location: "",
+    name: "", phone: "",
   });
 
   // ── Symptom selection: { [gejalaId]: confidenceValue } ───

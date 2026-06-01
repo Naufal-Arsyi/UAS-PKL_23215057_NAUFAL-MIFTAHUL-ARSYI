@@ -31,10 +31,9 @@ function buildWAText(company, selected, results) {
     .join(", ");
   const dm = DISPATCH_META[top.dispatch];
   return encodeURIComponent(
-    `Halo ${company.contact || company.name || "Tim IT"},\n\n` +
+    `Halo,\n\n` +
     `Berikut hasil analisis gangguan WiFi:\n` +
-    `🏢 Perusahaan: ${company.name || "-"}\n` +
-    `📍 Lokasi: ${company.location || "-"}\n\n` +
+    `📶 WiFi: ${company.name || "-"}\n\n` +
     `📋 Gejala: ${syms}\n\n` +
     `🔍 Penyebab: ${top.nama}\n` +
     `📊 Certainty Factor: ${(top.cf * 100).toFixed(1)}%\n` +
@@ -63,10 +62,8 @@ export default function Results({ results, selected, company, onBack, onReset })
         <p className="print-receipt-title">NetReport — Tiket Gangguan WiFi</p>
         <p style={{ textAlign: "center", marginBottom: 4 }}>Tanggal: {printDate}</p>
         <hr className="print-receipt-divider" />
-        <p><strong>Perusahaan:</strong> {company.name || "-"}</p>
-        <p><strong>PIC:</strong>        {company.contact || "-"}</p>
+        <p><strong>Nama WiFi:</strong> {company.name || "-"}</p>
         <p><strong>No. HP:</strong>     {company.phone || "-"}</p>
-        <p><strong>Lokasi:</strong>     {company.location || "-"}</p>
         <hr className="print-receipt-divider" />
         <p><strong>Gejala Dilaporkan:</strong></p>
         {Object.keys(selected).map((id) => (
@@ -149,11 +146,10 @@ export default function Results({ results, selected, company, onBack, onReset })
               </div>
 
               {/* Company info */}
-              {(company.name || company.contact) && (
+              {company.name && (
                 <div className="card company-bar">
-                  {company.name    && <span><span className="company-bar-label">Perusahaan:</span> <strong>{company.name}</strong></span>}
-                  {company.contact && <span><span className="company-bar-label">PIC:</span> <strong>{company.contact}</strong></span>}
-                  {company.location && <span><span className="company-bar-label">Lokasi:</span> <strong>{company.location}</strong></span>}
+                  <span><span className="company-bar-label">WiFi:</span> <strong>{company.name}</strong></span>
+                  {company.phone && <span><span className="company-bar-label">Telepon:</span> <strong>{company.phone}</strong></span>}
                 </div>
               )}
 
