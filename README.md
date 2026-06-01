@@ -548,13 +548,77 @@ report_generator.save_report('Laporan_Diagnosa.txt', report)
 
 ---
 
+## 🔗 N8N Webhook Integration
+
+Sistem ini dilengkapi dengan integrasi webhook untuk mengirim data analisis secara otomatis ke **N8N** workflow automation platform.
+
+### Fitur Webhook:
+- **Automatic Data Transmission**: Data hasil analisis dikirim otomatis ketika user menekan tombol "Cetak"
+- **Structured JSON Payload**: Format data terstandar untuk mudah diproses di N8N
+- **Error Handling**: User-friendly error messages jika webhook gagal
+- **Real-time Feedback**: Success/error notifications di UI
+
+### Data yang Dikirim:
+```json
+{
+  "wifiName": "Nama WiFi",
+  "phone": "081234567890",
+  "diagnosis": {
+    "id": "P01",
+    "nama": "Nama penyebab gangguan",
+    "cf": 0.87,
+    "solusi": "Solusi yang direkomendasikan",
+    "dispatch": "self|remote|onsite"
+  },
+  "symptoms": { "G01": 0.8, "G03": 0.6 },
+  "timestamp": "2026-06-01T10:30:45.123Z"
+}
+```
+
+### Webhook URL:
+```
+http://localhost:5678/webhook-test/Laptop-diagnose
+```
+
+### Setup Instructions:
+Lihat file dokumentasi lengkap:
+- **API Documentation**: [N8N_WEBHOOK_API.md](./N8N_WEBHOOK_API.md)
+- **Setup Guide**: [N8N_SETUP_GUIDE.md](./N8N_SETUP_GUIDE.md)
+
+### Quick Start:
+```bash
+# 1. Start N8N (menggunakan Docker)
+docker run -it --rm -p 5678:80 n8nio/n8n
+
+# 2. Setup webhook di N8N
+# Buka http://localhost:5678
+# Buat workflow dengan webhook trigger di path: /webhook-test/Laptop-diagnose
+
+# 3. Run aplikasi WiFi Troubleshooting
+npm run dev
+
+# 4. Test
+# - Buat laporan WiFi
+# - Pilih gejala
+# - Klik "Cetak"
+# - Lihat data di N8N execution log
+```
+
+### Konfigurasi:
+Jika menggunakan N8N di URL berbeda, edit `.env.local`:
+```env
+VITE_N8N_WEBHOOK_URL=https://your-n8n-domain.com/webhook-test/Laptop-diagnose
+```
+
+---
+
 ## ✉️ Contact & Questions
 
 For questions, improvements, or bug reports regarding this WiFi Expert System, please contact the development team.
 
-**System Version:** 1.0
-**Last Updated:** May 2026
-**Status:** Production Ready
+**System Version:** 1.1
+**Last Updated:** June 2026
+**Status:** Production Ready with N8N Integration
 
 ---
 

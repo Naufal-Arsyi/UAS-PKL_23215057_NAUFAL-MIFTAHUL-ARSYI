@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ArrowLeft, Printer, MessageSquare, Star, AlertCircle,
   RotateCcw, Wifi, MapPin, Monitor, Phone,
@@ -6,6 +6,7 @@ import {
 import { GEJALA } from "../data/gejala.js";
 import { DISPATCH_META } from "../data/penyebab.js";
 import { getMatchedGejala } from "../utils/cfEngine.js";
+import { sendToN8nWebhook, formatN8nPayload } from "../utils/webhookService.js";
 import "../styles/global.css";
 import "../styles/results.css";
 
@@ -44,11 +45,12 @@ function buildWAText(company, selected, results) {
 }
 
 export default function Results({ results, selected, company, onBack, onReset }) {
-  const [n8nSent, setN8nSent] = useState(false);
-  const [n8nError, setN8nError] = useState(null);
-  
   const top     = results[0];
   const waPhone = company.phone?.replace(/\D/g, "");
+  const [webhookSending, setWebhookSending] = useState(false);
+  const [webhookError, setWebhookError] = useState(null);
+  const [webhookSuccess, setWebhookSuccess] = useState(false);
+
   const waText  = useMemo(
     () => top ? buildWAText(company, selected, results) : "",
     [company, selected, results, top]
@@ -58,64 +60,36 @@ export default function Results({ results, selected, company, onBack, onReset })
     day: "2-digit", month: "long", year: "numeric",
   });
 
-  // ── Send data to n8n webhook ──
-  useEffect(() => {
-    if (!top || n8nSent) return;
+  /**
+   * Handle print dengan webhook ke n8n
+   */
+  const handlePrint = async () => {
+    // Clear previous messages
+    setWebhookError(null);
+    setWebhookSuccess(false);
 
-    const sendToN8n = async () => {
-      try {
-        const symptoms = Object.keys(selected)
-          .map((id) => ({
-            id,
-            nama: GEJALA.find((g) => g.id === id)?.nama,
-            confidence: selected[id],
-          }))
-          .filter(Boolean);
+    if (!top) return;
 
-        const payload = {
-          timestamp: new Date().toISOString(),
-          wifiName: company.name || "Unknown",
-          phone: company.phone || "",
-          symptoms: symptoms,
-          diagnosis: {
-            id: top.id,
-            nama: top.nama,
-            certaintyFactor: (top.cf * 100).toFixed(1),
-            dispatch: top.dispatch,
-            dispatchLabel: DISPATCH_META[top.dispatch].label,
-            solusi: top.solusi,
-          },
-          topThreeResults: results.slice(0, 3).map((r, i) => ({
-            rank: i + 1,
-            id: r.id,
-            nama: r.nama,
-            cf: (r.cf * 100).toFixed(1),
-            dispatch: r.dispatch,
-          })),
-        };
+    // Kirim data ke n8n webhook
+    setWebhookSending(true);
+    try {
+      const payload = formatN8nPayload(company, top, selected);
+      await sendToN8nWebhook(payload);
+      setWebhookSuccess(true);
+      setWebhookError(null);
+      
+      // Auto-clear success message setelah 3 detik
+      setTimeout(() => setWebhookSuccess(false), 3000);
+    } catch (error) {
+      console.error("Webhook error:", error);
+      setWebhookError(error.message || "Gagal mengirim data ke n8n");
+    } finally {
+      setWebhookSending(false);
+    }
 
-        const response = await fetch("http://localhost:5678/webhook-test/Laptop-diagnose", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (response.ok) {
-          setN8nSent(true);
-          console.log("✅ Data sent to n8n successfully");
-        } else {
-          console.warn("⚠️ n8n webhook returned status:", response.status);
-        }
-      } catch (error) {
-        console.error("❌ Failed to send data to n8n:", error);
-        setN8nError(error.message);
-      }
-    };
-
-    sendToN8n();
-  }, [top, selected, results, n8nSent]);
+    // Trigger print
+    window.print();
+  };
 
   return (
     <div className="results-page page">
@@ -156,13 +130,13 @@ export default function Results({ results, selected, company, onBack, onReset })
             <span className="logo-name logo-name--sm">Hasil Analisis</span>
           </div>
           <div className="results-topbar-actions">
-            {n8nSent && (
-              <span style={{ fontSize: 12, color: "#10B981", display: "flex", alignItems: "center", gap: 4 }}>
-                ✓ Terkirim ke n8n
-              </span>
-            )}
-            <button className="btn btn-ghost btn-sm" onClick={() => window.print()}>
-              <Printer size={14} /> Cetak
+            <button 
+              className="btn btn-ghost btn-sm" 
+              onClick={handlePrint}
+              disabled={webhookSending}
+              title={webhookSending ? "Mengirim data ke n8n..." : "Cetak dan kirim ke n8n"}
+            >
+              <Printer size={14} /> {webhookSending ? "Mengirim..." : "Cetak"}
             </button>
             {waPhone && top && (
               <a className="btn btn-wa btn-sm"
@@ -172,6 +146,41 @@ export default function Results({ results, selected, company, onBack, onReset })
               </a>
             )}
           </div>
+          
+          {/* Webhook Status Messages */}
+          {webhookError && (
+            <div style={{
+              margin: "12px 0",
+              padding: "12px",
+              backgroundColor: "#FEE2E2",
+              border: "1px solid #FCA5A5",
+              borderRadius: "6px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontSize: "13px",
+              color: "#DC2626",
+            }}>
+              <AlertCircle size={16} />
+              <span>⚠️ Webhook gagal: {webhookError}</span>
+            </div>
+          )}
+          {webhookSuccess && (
+            <div style={{
+              margin: "12px 0",
+              padding: "12px",
+              backgroundColor: "#DCFCE7",
+              border: "1px solid #86EFAC",
+              borderRadius: "6px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontSize: "13px",
+              color: "#16A34A",
+            }}>
+              ✅ Data berhasil dikirim ke n8n
+            </div>
+          )}
         </nav>
 
         <div className="container" style={{ paddingTop: 20, paddingBottom: 24 }}>
