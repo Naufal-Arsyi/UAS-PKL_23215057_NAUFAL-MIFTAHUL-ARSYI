@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import {
   ArrowLeft, Printer, MessageSquare, Star, AlertCircle,
   RotateCcw, Wifi, MapPin, Monitor, Phone,
@@ -44,6 +44,9 @@ function buildWAText(company, selected, results) {
 }
 
 export default function Results({ results, selected, company, onBack, onReset }) {
+  const [n8nSent, setN8nSent] = useState(false);
+  const [n8nError, setN8nError] = useState(null);
+  
   const top     = results[0];
   const waPhone = company.phone?.replace(/\D/g, "");
   const waText  = useMemo(
@@ -54,6 +57,65 @@ export default function Results({ results, selected, company, onBack, onReset })
   const printDate = new Date().toLocaleDateString("id-ID", {
     day: "2-digit", month: "long", year: "numeric",
   });
+
+  // ── Send data to n8n webhook ──
+  useEffect(() => {
+    if (!top || n8nSent) return;
+
+    const sendToN8n = async () => {
+      try {
+        const symptoms = Object.keys(selected)
+          .map((id) => ({
+            id,
+            nama: GEJALA.find((g) => g.id === id)?.nama,
+            confidence: selected[id],
+          }))
+          .filter(Boolean);
+
+        const payload = {
+          timestamp: new Date().toISOString(),
+          wifiName: company.name || "Unknown",
+          phone: company.phone || "",
+          symptoms: symptoms,
+          diagnosis: {
+            id: top.id,
+            nama: top.nama,
+            certaintyFactor: (top.cf * 100).toFixed(1),
+            dispatch: top.dispatch,
+            dispatchLabel: DISPATCH_META[top.dispatch].label,
+            solusi: top.solusi,
+          },
+          topThreeResults: results.slice(0, 3).map((r, i) => ({
+            rank: i + 1,
+            id: r.id,
+            nama: r.nama,
+            cf: (r.cf * 100).toFixed(1),
+            dispatch: r.dispatch,
+          })),
+        };
+
+        const response = await fetch("http://localhost:5678/webhook-test/Laptop-diagnose", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          setN8nSent(true);
+          console.log("✅ Data sent to n8n successfully");
+        } else {
+          console.warn("⚠️ n8n webhook returned status:", response.status);
+        }
+      } catch (error) {
+        console.error("❌ Failed to send data to n8n:", error);
+        setN8nError(error.message);
+      }
+    };
+
+    sendToN8n();
+  }, [top, selected, results, n8nSent]);
 
   return (
     <div className="results-page page">
@@ -94,6 +156,11 @@ export default function Results({ results, selected, company, onBack, onReset })
             <span className="logo-name logo-name--sm">Hasil Analisis</span>
           </div>
           <div className="results-topbar-actions">
+            {n8nSent && (
+              <span style={{ fontSize: 12, color: "#10B981", display: "flex", alignItems: "center", gap: 4 }}>
+                ✓ Terkirim ke n8n
+              </span>
+            )}
             <button className="btn btn-ghost btn-sm" onClick={() => window.print()}>
               <Printer size={14} /> Cetak
             </button>
