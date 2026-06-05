@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LogOut, CheckCircle, X, Clock, MessageSquare,
-  Send, Wifi, MapPin, Monitor, Phone,
+  Send, Wifi, MapPin, Monitor,
 } from "lucide-react";
 import Modal from "../components/Modal.jsx";
-import { GEJALA } from "../data/gejala.js";
-import { DISPATCH_META } from "../data/penyebab.js";
+import { fetchGejala } from "../services/ApiService.js";
 import "../styles/global.css";
 import "../styles/technician.css";
 
@@ -13,6 +12,21 @@ const STATUS_META = {
   pending:     { cls: "badge-pending",     label: "Antrian"      },
   in_progress: { cls: "badge-in-progress", label: "Dalam Proses" },
   done:        { cls: "badge-done",        label: "Selesai"      },
+};
+
+const DISPATCH_META = {
+  self: {
+    label: "Mandiri",
+    desc: "Klien dapat menangani sendiri",
+  },
+  remote: {
+    label: "Remote",
+    desc: "Teknisi tangani dari jarak jauh",
+  },
+  onsite: {
+    label: "Onsite",
+    desc: "Teknisi harus datang ke lokasi",
+  },
 };
 
 const DISPATCH_ICONS = {
@@ -40,12 +54,31 @@ export default function Technician({ cases, onCaseUpdate, onLogout }) {
   const [showWaModal, setShowWaModal] = useState(false);
   const [waSent,      setWaSent]      = useState(false);
   const [waProgress,  setWaProgress]  = useState("");
+  const [gejalaMap,   setGejalaMap]   = useState({});
 
   const stats = {
     pending:     cases.filter((c) => c.status === "pending").length,
     in_progress: cases.filter((c) => c.status === "in_progress").length,
     done:        cases.filter((c) => c.status === "done").length,
   };
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetchGejala()
+      .then((data) => {
+        if (!mounted) return;
+        const map = Object.fromEntries((data || []).map((item) => [item.id, item]));
+        setGejalaMap(map);
+      })
+      .catch((error) => {
+        console.error("Gagal memuat gejala untuk technician view:", error);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const openDetail = (c) => { setActiveCase(c); setWaSent(false); setWaProgress(""); };
 
@@ -121,7 +154,7 @@ export default function Technician({ cases, onCaseUpdate, onLogout }) {
                       <div className="case-tags">
                         {c.symptoms.slice(0, 3).map((sid) => (
                           <span key={sid} className="case-tag">
-                            {GEJALA.find((g) => g.id === sid)?.nama}
+                            {gejalaMap[sid]?.nama || sid}
                           </span>
                         ))}
                         {c.symptoms.length > 3 && (
@@ -181,7 +214,7 @@ export default function Technician({ cases, onCaseUpdate, onLogout }) {
                   <div className="detail-tags">
                     {activeCase.symptoms.map((sid) => (
                       <span key={sid} className="detail-tag">
-                        {GEJALA.find((g) => g.id === sid)?.nama}
+                        {gejalaMap[sid]?.nama || sid}
                       </span>
                     ))}
                   </div>

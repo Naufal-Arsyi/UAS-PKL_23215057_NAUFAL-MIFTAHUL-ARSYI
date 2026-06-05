@@ -5,7 +5,7 @@
 
 export const WEBHOOK_CONFIG = {
   // URL webhook n8n untuk menerima data analisis
-  N8N_WEBHOOK_URL: import.meta.env.VITE_N8N_WEBHOOK_URL || "http://localhost:5678/webhook-test/Laptop-diagnose",
+  N8N_WEBHOOK_URL: import.meta.env.VITE_N8N_WEBHOOK_URL || "http://localhost:5678/webhook-test/netreport",
 
   // Timeout untuk webhook call (ms)
   TIMEOUT: 30000,

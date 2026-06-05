@@ -2,20 +2,21 @@
  * Service untuk mengirim data analisis ke webhook n8n
  */
 
+import { normalizePhoneNumber } from "./phoneNumber.js";
 import { WEBHOOK_CONFIG } from "./webhookConfig.js";
 
 /**
  * Kirim data hasil analisis ke webhook n8n
  * @param {Object} payload - Data yang akan dikirim
- * @param {string} payload.wifiName - Nama WiFi
- * @param {string} payload.phone - Nomor telepon (WhatsApp)
- * @param {Object} payload.diagnosis - Hasil analisis penyebab
- * @param {string} payload.diagnosis.id - ID penyebab
- * @param {string} payload.diagnosis.nama - Nama penyebab
- * @param {number} payload.diagnosis.cf - Certainty Factor (0-1)
- * @param {string} payload.diagnosis.solusi - Solusi untuk penyebab
- * @param {string} payload.diagnosis.dispatch - Tipe penanganan (self/remote/onsite)
- * @param {Object} payload.symptoms - Gejala yang dipilih { [id]: confidence }
+ * @param {string} payload.nama - Nama pelapor/WiFi
+ * @param {string} payload.no_telepon - Nomor telepon
+ * @param {Object} payload.hasil_analisa - Hasil analisis penyebab
+ * @param {string} payload.hasil_analisa.kode - ID penyebab
+ * @param {string} payload.hasil_analisa.nama - Nama penyebab
+ * @param {number} payload.hasil_analisa.cf - Certainty Factor (0-1)
+ * @param {string} payload.hasil_analisa.solusi - Solusi untuk penyebab
+ * @param {string} payload.hasil_analisa.dispatch - Tipe penanganan (self/remote/onsite)
+ * @param {Array<{ kode: string, nama: string, bobot: number }>} payload.gejala_ditekan - Gejala yang dipilih
  * @param {string} payload.timestamp - Timestamp laporan
  * @returns {Promise<Response>}
  */
@@ -72,18 +73,44 @@ export async function sendToN8nWebhook(payload) {
  * @param {Object} selected - Gejala yang dipilih { [id]: confidence }
  * @returns {Object} Payload yang siap dikirim
  */
-export function formatN8nPayload(company, topResult, selected) {
+export function formatN8nPayload(company, topResult, selected, gejalaMap = {}) {
+  const normalizedPhone = normalizePhoneNumber(company.phone);
+
+  const gejalaDitekan = Object.entries(selected)
+    .map(([id, bobot]) => {
+      const gejala = gejalaMap[id];
+
+      if (!gejala) return null;
+
+      return {
+        kode: gejala.id,
+        nama: gejala.nama,
+        bobot,
+      };
+    })
+    .filter(Boolean);
+
+  const hasilAnalisa = topResult
+    ? {
+        kode: topResult.id,
+        nama: topResult.nama,
+        cf: topResult.cf,
+        solusi: topResult.solusi,
+        dispatch: topResult.dispatch,
+      }
+    : null;
+
   return {
-    wifiName: company.name || "",
-    phone: company.phone || "",
-    diagnosis: {
-      id: topResult.id,
-      nama: topResult.nama,
-      cf: topResult.cf,
-      solusi: topResult.solusi,
-      dispatch: topResult.dispatch,
-    },
-    symptoms: selected,
+    nama: company.name || "",
+    no_telepon: normalizedPhone,
+    hasil_analisa: hasilAnalisa,
+    gejala_ditekan: gejalaDitekan,
     timestamp: new Date().toISOString(),
+
+    // Legacy aliases to avoid breaking existing webhook flows.
+    wifiName: company.name || "",
+    phone: normalizedPhone,
+    diagnosis: hasilAnalisa,
+    symptoms: selected,
   };
 }

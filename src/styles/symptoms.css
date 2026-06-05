@@ -13,7 +13,44 @@
 .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-faint); pointer-events: none; }
 .search-input { padding-left: 36px; }
 
-.symptoms-hint { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; }
+.symptoms-status { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; line-height: 1.45; }
+
+.symptom-empty-state {
+	background: linear-gradient(180deg, rgba(14, 165, 233, 0.08), rgba(255, 255, 255, 0.95));
+	border: 1.5px dashed rgba(148, 163, 184, 0.45);
+	border-radius: var(--r-md);
+	padding: 28px 18px;
+	margin-bottom: 20px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 8px;
+}
+
+.symptom-empty-icon {
+	width: 42px;
+	height: 42px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(14, 165, 233, 0.12);
+	color: var(--primary);
+}
+
+.symptom-empty-title {
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--text-sub);
+}
+
+.symptom-empty-desc {
+	font-size: 13px;
+	color: var(--text-faint);
+	line-height: 1.5;
+	max-width: 420px;
+}
 
 .symptom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin-bottom: 20px; }
 
@@ -31,8 +68,24 @@
 .symptom-desc { font-size: 11px; color: var(--text-faint); line-height: 1.4; margin-top: 2px; }
 .symptom-desc--selected { color: #0284C7; }
 
-.confidence-row { display: flex; gap: 4px; margin-top: 9px; }
-.cf-btn { flex: 1; padding: 3px 0; border-radius: 5px; font-size: 11.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: #F8FAFC; color: var(--text-faint); font-family: var(--font-body); transition: all 0.1s; }
+.confidence-row { display: flex; gap: 4px; margin-top: 9px; flex-wrap: wrap; }
+.cf-btn {
+	flex: 1 1 92px;
+	min-width: 92px;
+	padding: 5px 8px;
+	border-radius: 5px;
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+	border: 1px solid var(--border);
+	background: #F8FAFC;
+	color: var(--text-faint);
+	font-family: var(--font-body);
+	transition: all 0.1s;
+	line-height: 1.15;
+	text-align: center;
+	white-space: normal;
+}
 .cf-btn:hover { border-color: var(--primary); color: var(--primary); }
 .cf-btn--active { background: var(--primary); color: #fff; border-color: var(--primary); }
 

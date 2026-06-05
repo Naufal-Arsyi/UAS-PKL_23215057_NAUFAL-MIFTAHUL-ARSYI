@@ -1,16 +1,21 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  ArrowLeft, Printer, MessageSquare, Star, AlertCircle,
-  RotateCcw, Wifi, MapPin, Monitor, Phone,
+  ArrowLeft, MessageSquare, Star, AlertCircle,
+  RotateCcw, Wifi, MapPin, Monitor,
 } from "lucide-react";
-import { GEJALA } from "../data/gejala.js";
-import { DISPATCH_META } from "../data/penyebab.js";
-import { getMatchedGejala } from "../utils/cfEngine.js";
+import { fetchGejala } from "../services/ApiService.js";
 import { sendToN8nWebhook, formatN8nPayload } from "../utils/webhookService.js";
+import Modal from "../components/Modal.jsx";
 import "../styles/global.css";
 import "../styles/results.css";
 
 const RANK_COLORS = ["var(--primary)", "#818CF8", "var(--text-faint)"];
+
+const DISPATCH_META = {
+  self: { label: "Mandiri", desc: "Klien dapat menangani sendiri dipandu teknisi secara daring", color: "#059669", bg: "#ECFDF5", border: "#A7F3D0", textColor: "#065F46" },
+  remote: { label: "Remote", desc: "Teknisi tangani dari jarak jauh", color: "#0284C7", bg: "#F0F9FF", border: "#BAE6FD", textColor: "#0C4A6E" },
+  onsite: { label: "Onsite", desc: "Teknisi harus datang ke lokasi", color: "#DC2626", bg: "#FEF2F2", border: "#FECACA", textColor: "#7F1D1D" },
+};
 
 const DISPATCH_ICONS = {
   self:   <span style={{ fontSize: 22 }}>🟢</span>,
@@ -24,71 +29,63 @@ const DISPATCH_TITLES = {
   onsite: "Teknisi Harus Datang ke Lokasi",
 };
 
-function buildWAText(company, selected, results) {
-  const top  = results[0];
-  const syms = Object.keys(selected)
-    .map((id) => GEJALA.find((g) => g.id === id)?.nama)
-    .filter(Boolean)
-    .join(", ");
-  const dm = DISPATCH_META[top.dispatch];
-  return encodeURIComponent(
-    `Halo,\n\n` +
-    `Berikut hasil analisis gangguan WiFi:\n` +
-    `📶 WiFi: ${company.name || "-"}\n\n` +
-    `📋 Gejala: ${syms}\n\n` +
-    `🔍 Penyebab: ${top.nama}\n` +
-    `📊 Certainty Factor: ${(top.cf * 100).toFixed(1)}%\n` +
-    `⚡ Penanganan: ${dm.label} — ${dm.desc}\n\n` +
-    `💡 Solusi: ${top.solusi}\n\n` +
-    `— NetReport System`
-  );
-}
 
 export default function Results({ results, selected, company, onBack, onReset }) {
-  const top     = results[0];
-  const waPhone = company.phone?.replace(/\D/g, "");
+  const top = results[0];
+  const [gejalaMap, setGejalaMap] = useState({});
   const [webhookSending, setWebhookSending] = useState(false);
   const [webhookError, setWebhookError] = useState(null);
   const [webhookSuccess, setWebhookSuccess] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  const waText  = useMemo(
-    () => top ? buildWAText(company, selected, results) : "",
-    [company, selected, results, top]
-  );
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetchGejala()
+      .then((data) => {
+        if (!mounted) return;
+        const map = Object.fromEntries((data || []).map((item) => [item.id, item]));
+        setGejalaMap(map);
+      })
+      .catch((error) => {
+        console.error('Gagal memuat nama gejala untuk hasil:', error);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const printDate = new Date().toLocaleDateString("id-ID", {
     day: "2-digit", month: "long", year: "numeric",
   });
 
   /**
-   * Handle print dengan webhook ke n8n
+   * Handle kirim ke WA teknisi + webhook ke n8n
    */
-  const handlePrint = async () => {
-    // Clear previous messages
+  const handleSendTechnician = async (event) => {
+    event.preventDefault();
+
     setWebhookError(null);
     setWebhookSuccess(false);
+    setShowConfirmModal(false);
 
     if (!top) return;
 
-    // Kirim data ke n8n webhook
     setWebhookSending(true);
     try {
-      const payload = formatN8nPayload(company, top, selected);
+      const payload = formatN8nPayload(company, top, selected, gejalaMap);
       await sendToN8nWebhook(payload);
       setWebhookSuccess(true);
       setWebhookError(null);
-      
-      // Auto-clear success message setelah 3 detik
-      setTimeout(() => setWebhookSuccess(false), 3000);
     } catch (error) {
       console.error("Webhook error:", error);
       setWebhookError(error.message || "Gagal mengirim data ke n8n");
     } finally {
       setWebhookSending(false);
+      setShowConfirmModal(true);
     }
-
-    // Trigger print
-    window.print();
   };
 
   return (
@@ -103,7 +100,7 @@ export default function Results({ results, selected, company, onBack, onReset })
         <hr className="print-receipt-divider" />
         <p><strong>Gejala Dilaporkan:</strong></p>
         {Object.keys(selected).map((id) => (
-          <p key={id}>• {GEJALA.find((g) => g.id === id)?.nama} (CF: {selected[id]})</p>
+          <p key={id}>• {gejalaMap[id]?.nama || id} (CF: {selected[id]})</p>
         ))}
         <hr className="print-receipt-divider" />
         <p><strong>Hasil Diagnosa (Top 3):</strong></p>
@@ -119,6 +116,18 @@ export default function Results({ results, selected, company, onBack, onReset })
         )}
       </div>
 
+      {showConfirmModal && (
+        <Modal onClose={() => setShowConfirmModal(false)}>
+          <p className="qontak-modal-title">Laporan Anda akan kami proses</p>
+          <p className="qontak-modal-sub">
+            Dan akan kami hubungi lagi di nomor berikut: {company.phone || "-"}
+          </p>
+          <p className="qontak-modal-sub" style={{ color: "var(--text-faint)", marginTop: 8 }}>
+            Status pengiriman ke n8n: {webhookError ? "Gagal" : "Berhasil"}
+          </p>
+        </Modal>
+      )}
+
       {/* Screen view */}
       <div className="no-print">
         <nav className="topbar">
@@ -130,21 +139,15 @@ export default function Results({ results, selected, company, onBack, onReset })
             <span className="logo-name logo-name--sm">Hasil Analisis</span>
           </div>
           <div className="results-topbar-actions">
-            <button 
-              className="btn btn-ghost btn-sm" 
-              onClick={handlePrint}
-              disabled={webhookSending}
-              title={webhookSending ? "Mengirim data ke n8n..." : "Cetak dan kirim ke n8n"}
+            <a
+              className="btn btn-ghost btn-sm"
+              onClick={handleSendTechnician}
+              aria-disabled={webhookSending}
+              title={webhookSending ? "Mengirim data ke n8n..." : "Konfirmasi ke Teknisi"}
             >
-              <Printer size={14} /> {webhookSending ? "Mengirim..." : "Cetak"}
-            </button>
-            {waPhone && top && (
-              <a className="btn btn-wa btn-sm"
-                href={`https://wa.me/${waPhone}?text=${waText}`}
-                target="_blank" rel="noopener noreferrer">
-                <MessageSquare size={14} /> Kirim WA
-              </a>
-            )}
+              <MessageSquare size={14} /> {webhookSending ? "Mengirim..." : "Konfirmasi ke Teknisi"}
+            </a>
+            
           </div>
           
           {/* Webhook Status Messages */}
@@ -232,8 +235,9 @@ export default function Results({ results, selected, company, onBack, onReset })
               {/* Top 3 results */}
               <ol className="result-list">
                 {results.map((r, i) => {
-                  const matchedIds   = getMatchedGejala(r.id, selected);
-                  const matchedNames = matchedIds.map((id) => GEJALA.find((g) => g.id === id)?.nama).filter(Boolean);
+                  const matchedNames = Object.keys(selected)
+                    .map((id) => gejalaMap[id]?.nama || id)
+                    .filter(Boolean);
                   const accent       = RANK_COLORS[i] ?? "var(--text-faint)";
                   const cfPct        = (r.cf * 100).toFixed(1);
                   const dm           = DISPATCH_META[r.dispatch];

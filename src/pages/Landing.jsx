@@ -41,9 +41,6 @@ export default function Landing({ onStart, onTechLogin }) {
           <span className="logo-name">AlgioNet</span>
         </div>
         <div className="topbar-right">
-          <button className="btn btn-outline btn-sm" onClick={() => setShowModal(true)}>
-            <Wrench size={14} /> Login Teknisi
-          </button>
         </div>
       </nav>
 

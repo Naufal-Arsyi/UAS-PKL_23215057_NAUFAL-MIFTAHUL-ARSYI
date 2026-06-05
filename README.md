@@ -577,7 +577,7 @@ Sistem ini dilengkapi dengan integrasi webhook untuk mengirim data analisis seca
 
 ### Webhook URL:
 ```
-http://localhost:5678/webhook-test/Laptop-diagnose
+http://localhost:5678/webhook-test/netreport
 ```
 
 ### Setup Instructions:
@@ -592,7 +592,7 @@ docker run -it --rm -p 5678:80 n8nio/n8n
 
 # 2. Setup webhook di N8N
 # Buka http://localhost:5678
-# Buat workflow dengan webhook trigger di path: /webhook-test/Laptop-diagnose
+# Buat workflow dengan webhook trigger di path: /webhook-test/netreport
 
 # 3. Run aplikasi WiFi Troubleshooting
 npm run dev
@@ -607,7 +607,7 @@ npm run dev
 ### Konfigurasi:
 Jika menggunakan N8N di URL berbeda, edit `.env.local`:
 ```env
-VITE_N8N_WEBHOOK_URL=https://your-n8n-domain.com/webhook-test/Laptop-diagnose
+VITE_N8N_WEBHOOK_URL=https://your-n8n-domain.com/webhook-test/netreport
 ```
 
 ---

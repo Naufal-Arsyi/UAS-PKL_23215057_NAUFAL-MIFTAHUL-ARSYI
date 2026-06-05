@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft, Search, Check, ChevronRight, Wifi, WifiOff,
   Globe, Signal, Zap, Clock, Activity, RefreshCw, Server,
   AlertCircle, Building2, Phone, User, MapPin,
 } from "lucide-react";
-import { GEJALA, CF_LEVELS, CF_LABELS } from "../data/gejala.js";
+import { fetchGejala } from "../services/ApiService.js";
+import { normalizePhoneNumber } from "../utils/phoneNumber.js";
 import "../styles/global.css";
 import "../styles/symptoms.css";
 
@@ -68,16 +69,82 @@ export default function Symptoms({
   onBack, onAnalyze,
 }) {
   const [search, setSearch] = useState("");
+  const [gejalaList, setGejalaList] = useState([]);
+  const [loadingGejala, setLoadingGejala] = useState(true);
 
-  const filtered = useMemo(
-    () => GEJALA.filter((g) =>
-      g.nama.toLowerCase().includes(search.toLowerCase()) ||
-      g.deskripsi.toLowerCase().includes(search.toLowerCase())
-    ),
-    [search]
+  const normalizedSearch = search.trim().toLowerCase();
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetchGejala()
+      .then((data) => {
+        if (mounted) setGejalaList(data);
+      })
+      .catch((error) => {
+        console.error('Gagal memuat gejala dari API:', error);
+        if (mounted) setGejalaList([]);
+      })
+      .finally(() => {
+        if (mounted) setLoadingGejala(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const CF_LEVELS = [0.2, 0.4, 0.6, 0.8, 1.0];
+  const CF_LABELS = {
+    0.2: 'tidak yakin',
+    0.4: 'kurang yakin',
+    0.6: 'cukup yakin',
+    0.8: 'yakin',
+    1.0: 'sangat yakin',
+  };
+
+  const selectedSymptoms = useMemo(
+    () => gejalaList.filter((g) => g.id in selected),
+    [gejalaList, selected]
   );
 
+  const matchedSymptoms = useMemo(() => {
+    if (!normalizedSearch) return [];
+
+    const queryParts = normalizedSearch.split(/\s+/).filter(Boolean);
+
+    return gejalaList.filter((g) => {
+      const haystack = `${g.id} ${g.nama} ${g.deskripsi}`.toLowerCase();
+      return queryParts.every((part) => haystack.includes(part));
+    });
+  }, [gejalaList, normalizedSearch]);
+
+  const visibleSymptoms = useMemo(() => {
+    const visible = new Map();
+
+    selectedSymptoms.forEach((g) => visible.set(g.id, g));
+
+    matchedSymptoms.forEach((g) => visible.set(g.id, g));
+
+    return Array.from(visible.values());
+  }, [matchedSymptoms, selectedSymptoms]);
+
+  const hasSearchQuery = normalizedSearch.length > 0;
+  const hasVisibleSymptoms = visibleSymptoms.length > 0;
+
   const selCount = Object.keys(selected).length;
+
+  const statusMessage = !hasSearchQuery
+    ? (selectedSymptoms.length > 0
+      ? `${selectedSymptoms.length} gejala terpilih tetap ditampilkan.`
+      : "Ketik kata kunci untuk menampilkan gejala yang ingin dipilih.")
+    : (matchedSymptoms.length > 0
+      ? (selectedSymptoms.length > 0
+        ? `${matchedSymptoms.length} gejala ditemukan. Gejala terpilih tetap ditampilkan.`
+        : `${matchedSymptoms.length} gejala ditemukan. Klik untuk memilih.`)
+      : (selectedSymptoms.length > 0
+        ? "Tidak ada gejala baru yang cocok. Gejala terpilih tetap ditampilkan."
+        : "Tidak ada gejala yang cocok. Coba kata kunci lain."));
 
   return (
     <div className="symptoms-page page">
@@ -99,17 +166,17 @@ export default function Symptoms({
       <div className="container" style={{ paddingTop: 20, paddingBottom: 16 }}>
         {/* Company / client info */}
         <div className="card company-form">
-          <p className="company-form-title">Informasi Pelapor</p>
+          <p className="company-form-title">Informasi Pelanggan</p>
           <div className="company-form-grid">
             <div style={{ position: "relative" }}>
               <Wifi size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-faint)" }} />
-              <input className="input" style={{ paddingLeft: 30 }} placeholder="Nama WiFi"
+              <input className="input" style={{ paddingLeft: 30 }} placeholder="Nama Pelanggan"
                 value={company.name} onChange={(e) => setCompany({ ...company, name: e.target.value })} />
             </div>
             <div style={{ position: "relative" }}>
               <Phone size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-faint)" }} />
               <input className="input" style={{ paddingLeft: 30 }} placeholder="No. HP (WhatsApp)"
-                value={company.phone} onChange={(e) => setCompany({ ...company, phone: e.target.value })} />
+                  value={company.phone} onChange={(e) => setCompany({ ...company, phone: normalizePhoneNumber(e.target.value) })} />
             </div>
           </div>
         </div>
@@ -117,55 +184,73 @@ export default function Symptoms({
         {/* Search */}
         <div className="search-wrapper">
           <Search size={15} className="search-icon" />
-          <input className="input search-input" placeholder="Cari gejala yang dialami..."
+          <input className="input search-input" placeholder="Cari gejala, misalnya lambat, LOS, DHCP..."
             value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
 
-        <p className="symptoms-hint">
-          Pilih semua gejala yang saat ini dialami, lalu tentukan seberapa yakin Anda terhadap gejala tersebut.
-        </p>
+        <div className="symptoms-status" aria-live="polite">
+          {loadingGejala ? 'Memuat daftar gejala dari database...' : statusMessage}
+        </div>
 
         {/* Symptom grid */}
-        <div className="symptom-grid" role="list">
-          {filtered.map(({ id, nama, deskripsi }) => {
-            const isSel = id in selected;
-            const conf  = selected[id];
-            const Icon  = ICON_MAP[id] ?? Activity;
+        {hasVisibleSymptoms ? (
+          <div className="symptom-grid" role="list">
+            {visibleSymptoms.map(({ id, nama, deskripsi }) => {
+              const isSel = id in selected;
+              const conf  = selected[id];
+              const Icon  = ICON_MAP[id] ?? Activity;
 
-            return (
-              <div key={id} role="listitem"
-                className={`symptom-card${isSel ? " symptom-card--selected" : ""}`}
-                onClick={() => onToggle(id)}>
+              return (
+                <div key={id} role="listitem"
+                  className={`symptom-card${isSel ? " symptom-card--selected" : ""}`}
+                  onClick={() => onToggle(id)}>
 
-                <div className="symptom-card-row">
-                  <div className={`symptom-checkbox${isSel ? " symptom-checkbox--checked" : ""}`} aria-hidden="true">
-                    {isSel && <Check size={11} color="#fff" strokeWidth={3} />}
-                  </div>
-                  <div className="symptom-label-wrap">
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <Icon size={13} color={isSel ? "var(--primary)" : "var(--text-faint)"} />
-                      <span className={`symptom-name${isSel ? " symptom-name--selected" : ""}`}>{nama}</span>
+                  <div className="symptom-card-row">
+                    <div className={`symptom-checkbox${isSel ? " symptom-checkbox--checked" : ""}`} aria-hidden="true">
+                      {isSel && <Check size={11} color="#fff" strokeWidth={3} />}
                     </div>
-                    <p className={`symptom-desc${isSel ? " symptom-desc--selected" : ""}`}>{deskripsi}</p>
+                    <div className="symptom-label-wrap">
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <Icon size={13} color={isSel ? "var(--primary)" : "var(--text-faint)"} />
+                        <span className={`symptom-name${isSel ? " symptom-name--selected" : ""}`}>{nama}</span>
+                      </div>
+                      <p className={`symptom-desc${isSel ? " symptom-desc--selected" : ""}`}>{deskripsi}</p>
+                    </div>
                   </div>
-                </div>
 
-                {isSel && (
-                  <div className="confidence-row" onClick={(e) => e.stopPropagation()}
-                    role="group" aria-label={`Keyakinan untuk ${nama}`}>
-                    {CF_LEVELS.map((lv) => (
-                      <button key={lv} className={`cf-btn${conf === lv ? " cf-btn--active" : ""}`}
-                        title={CF_LABELS[lv]} aria-pressed={conf === lv}
-                        onClick={() => onSetConf(id, lv)}>
-                        {lv.toFixed(1)}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  {isSel && (
+                    <div className="confidence-row" onClick={(e) => e.stopPropagation()}
+                      role="group" aria-label={`Keyakinan untuk ${nama}`}>
+                      {CF_LEVELS.map((lv) => (
+                        <button key={lv} className={`cf-btn${conf === lv ? " cf-btn--active" : ""}`}
+                          title={`Tingkat keyakinan: ${CF_LABELS[lv]}`}
+                          aria-label={`Tingkat keyakinan ${CF_LABELS[lv]}`}
+                          aria-pressed={conf === lv}
+                          onClick={() => onSetConf(id, lv)}>
+                          {CF_LABELS[lv]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="symptom-empty-state" aria-live="polite">
+            <div className="symptom-empty-icon">
+              <Search size={18} />
+            </div>
+            <p className="symptom-empty-title">
+              {!hasSearchQuery ? "Mulai dengan pencarian" : "Gejala tidak ditemukan"}
+            </p>
+            <p className="symptom-empty-desc">
+              {!hasSearchQuery
+                ? "Semua gejala disembunyikan sampai Anda mengetik kata kunci di kolom pencarian."
+                : "Ubah kata kunci untuk menampilkan gejala yang sesuai."}
+            </p>
+          </div>
+        )}
 
         {/* Bottom bar */}
         <div className="card analyze-bar">

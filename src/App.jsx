@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { calcCF } from "./utils/cfEngine.js";
+import { diagnose } from "./services/ApiService.js";
 import { MOCK_CASES } from "./data/mockCases.js";
 import Landing    from "./pages/Landing.jsx";
 import Symptoms   from "./pages/Symptoms.jsx";
@@ -33,9 +33,15 @@ export default function App() {
     setSelected((prev) => ({ ...prev, [id]: val }));
 
   // ── Analyze: jalankan CF engine, pindah ke hasil ─────────
-  const handleAnalyze = () => {
-    setResults(calcCF(selected));
-    setPage("results");
+  const handleAnalyze = async () => {
+    try {
+      const response = await diagnose(selected);
+      setResults(response.results || []);
+      setPage("results");
+    } catch (error) {
+      console.error("Diagnosa gagal:", error);
+      alert("Gagal melakukan diagnosa. Pastikan server PHP berjalan di http://localhost:8000");
+    }
   };
 
   // ── Teknisi login ─────────────────────────────────────────
