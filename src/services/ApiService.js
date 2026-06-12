@@ -1,38 +1,82 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+const API_URL =
+  import.meta.env.VITE_API_URL;
+  
+console.log(
+  "CLIENT API URL:",
+  API_URL
+);
+async function request(
+  path,
+  options = {}
+) {
 
-async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-    ...options,
-  });
+  const response =
+    await fetch(
+      `${API_URL}${path}`,
+      {
+        headers: {
+          "Content-Type":
+            "application/json",
+          ...(options.headers || {}),
+        },
+        ...options,
+      }
+    );
+
+  const result =
+    await response.json();
 
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || `Request failed: ${response.status}`);
+    throw new Error(
+      result.message ||
+      "Request gagal"
+    );
   }
 
-  return response.json();
+  return result;
 }
 
 export async function fetchGejala() {
-  const result = await request('/gejala.php');
+
+  const result =
+    await request(
+      "/gejala.php"
+    );
+
   return result.data || [];
 }
 
 export async function fetchPenyebab() {
-  const result = await request('/penyebab.php');
+
+  const result =
+    await request(
+      "/penyebab.php"
+    );
+
   return result.data || [];
 }
 
 export async function fetchRules() {
-  const result = await request('/rules.php');
+
+  const result =
+    await request(
+      "/rules.php"
+    );
+
   return result.data || [];
 }
 
-export async function diagnose(selected) {
-  const result = await request('/diagnosa.php', {
-    method: 'POST',
-    body: JSON.stringify({ selected }),
-  });
-  return result;
+export async function diagnose(
+  selected
+) {
+
+  return request(
+    "/diagnosa.php",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        selected,
+      }),
+    }
+  );
 }
