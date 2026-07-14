@@ -1,4 +1,9 @@
+NAMA : Naufal Miftahul Arsyi
+Tempat PKL : Algio Link Indonesia
+Judul sistem : SISTEM PAKAR GANGGUAN WiFi (NetReport)
+
 # SISTEM PAKAR GANGGUAN WiFi - WIFI EXPERT SYSTEM
+
 ## Rule-Based Diagnostic System with Certainty Factor (CF) and Forward Chaining
 
 ---
@@ -29,12 +34,14 @@ Mengembangkan sistem pelaporan gangguan WiFi dari client ke provider yang dapat:
 ## 🔧 METODOLOGI
 
 ### Pendekatan Sistem:
+
 - **Rule-Based Expert System** - Menggunakan rules IF-THEN untuk diagnosis
 - **Forward Chaining** - Dari gejala menuju diagnosa gangguan
 - **Certainty Factor (CF)** - Ukuran kepercayaan dalam diagnosis
 - **Multi-evidence CF Combination** - Menggabungkan multiple symptoms
 
 ### Formula CF Combination:
+
 ```
 CF_combined = CF₁ + CF₂(1 - CF₁)
 
@@ -52,20 +59,21 @@ CF_combined = 0.92
 
 ### 1. Gangguan WiFi (G01-G10) - 10 Kategori
 
-| Kode | Gangguan | Severity | CF Typical |
-|------|----------|----------|-----------|
-| G01 | Koneksi WiFi Lambat | Medium | 0.0 |
-| G02 | Putus Koneksi Berulang | High | 0.0 |
-| G03 | Sinyal Lemah | Low | 0.0 |
-| G04 | Latensi Tinggi | Medium | 0.0 |
-| G05 | Masalah Resolusi DNS | Medium | 0.0 |
-| G06 | Masalah DHCP (IP Assignment) | High | 0.0 |
-| G07 | AP Overheating | High | 0.0 |
-| G08 | Gangguan Interferensi | Medium | 0.0 |
-| G09 | Kegagalan Autentikasi | High | 0.0 |
-| G10 | Kemacetan Bandwidth | High | 0.0 |
+| Kode | Gangguan                     | Severity | CF Typical |
+| ---- | ---------------------------- | -------- | ---------- |
+| G01  | Koneksi WiFi Lambat          | Medium   | 0.0        |
+| G02  | Putus Koneksi Berulang       | High     | 0.0        |
+| G03  | Sinyal Lemah                 | Low      | 0.0        |
+| G04  | Latensi Tinggi               | Medium   | 0.0        |
+| G05  | Masalah Resolusi DNS         | Medium   | 0.0        |
+| G06  | Masalah DHCP (IP Assignment) | High     | 0.0        |
+| G07  | AP Overheating               | High     | 0.0        |
+| G08  | Gangguan Interferensi        | Medium   | 0.0        |
+| G09  | Kegagalan Autentikasi        | High     | 0.0        |
+| G10  | Kemacetan Bandwidth          | High     | 0.0        |
 
 **Severity Levels:**
+
 - **High (Kritis)**: Perlu tindakan segera, berdampak pada banyak user
 - **Medium (Penting)**: Mengganggu produksi, perlu investigasi cepat
 - **Low (Minor)**: Berdampak terbatas, bisa ditangani user sendiri
@@ -74,30 +82,31 @@ CF_combined = 0.92
 
 ### 2. Penyebab Gangguan (P01-P20) - 20 Jenis
 
-| Kode | Penyebab | Jenis | CF Range | Solusi |
-|------|----------|-------|----------|---------|
-| P01 | Jarak jauh dari AP | Hardware | 0.6-0.8 | Pindahkan AP lebih dekat |
-| P02 | Antena AP rusak | Hardware | 0.7-0.9 | Ganti antena AP |
-| P03 | Channel WiFi tidak optimal | Configuration | 0.5-0.7 | Ubah WiFi channel |
-| P04 | Bandwidth settings tidak sesuai | Configuration | 0.4-0.6 | Optimalkan bandwidth |
-| P05 | Daya transmit AP rendah | Configuration | 0.6-0.8 | Tingkatkan TX power |
-| P06 | Kabel Ethernet rusak | Hardware | 0.8-0.95 | Perbaiki kabel |
-| P07 | AP overheating | Hardware | 0.7-0.9 | Bersihkan AP |
-| P08 | Firmware AP outdated | Software | 0.5-0.7 | Update firmware |
-| P09 | Interferensi 2.4GHz | Environmental | 0.6-0.8 | Ubah channel |
-| P10 | ISP problem | External | 0.75-0.95 | Hubungi ISP |
-| P11 | User terlalu banyak | Load | 0.6-0.85 | Limit koneksi |
-| P12 | DNS Server tidak responsif | Service | 0.65-0.85 | Ganti DNS server |
-| P13 | DHCP Server bermasalah | Service | 0.7-0.9 | Restart DHCP |
-| P14 | IP range penuh | Configuration | 0.65-0.85 | Extend IP range |
-| P15 | Hardware/driver klien problem | Client | 0.5-0.75 | Update driver |
-| P16 | MAC filtering aktif | Security | 0.8-0.95 | Register MAC address |
-| P17 | Password WiFi salah | Security | 0.75-0.95 | Verifikasi password |
-| P18 | Memory AP penuh | Hardware | 0.6-0.8 | Restart AP |
-| P19 | WPS issue | Security | 0.4-0.6 | Disable WPS |
-| P20 | Thermal throttling | Hardware | 0.7-0.9 | Tingkatkan ventilasi |
+| Kode | Penyebab                        | Jenis         | CF Range  | Solusi                   |
+| ---- | ------------------------------- | ------------- | --------- | ------------------------ |
+| P01  | Jarak jauh dari AP              | Hardware      | 0.6-0.8   | Pindahkan AP lebih dekat |
+| P02  | Antena AP rusak                 | Hardware      | 0.7-0.9   | Ganti antena AP          |
+| P03  | Channel WiFi tidak optimal      | Configuration | 0.5-0.7   | Ubah WiFi channel        |
+| P04  | Bandwidth settings tidak sesuai | Configuration | 0.4-0.6   | Optimalkan bandwidth     |
+| P05  | Daya transmit AP rendah         | Configuration | 0.6-0.8   | Tingkatkan TX power      |
+| P06  | Kabel Ethernet rusak            | Hardware      | 0.8-0.95  | Perbaiki kabel           |
+| P07  | AP overheating                  | Hardware      | 0.7-0.9   | Bersihkan AP             |
+| P08  | Firmware AP outdated            | Software      | 0.5-0.7   | Update firmware          |
+| P09  | Interferensi 2.4GHz             | Environmental | 0.6-0.8   | Ubah channel             |
+| P10  | ISP problem                     | External      | 0.75-0.95 | Hubungi ISP              |
+| P11  | User terlalu banyak             | Load          | 0.6-0.85  | Limit koneksi            |
+| P12  | DNS Server tidak responsif      | Service       | 0.65-0.85 | Ganti DNS server         |
+| P13  | DHCP Server bermasalah          | Service       | 0.7-0.9   | Restart DHCP             |
+| P14  | IP range penuh                  | Configuration | 0.65-0.85 | Extend IP range          |
+| P15  | Hardware/driver klien problem   | Client        | 0.5-0.75  | Update driver            |
+| P16  | MAC filtering aktif             | Security      | 0.8-0.95  | Register MAC address     |
+| P17  | Password WiFi salah             | Security      | 0.75-0.95 | Verifikasi password      |
+| P18  | Memory AP penuh                 | Hardware      | 0.6-0.8   | Restart AP               |
+| P19  | WPS issue                       | Security      | 0.4-0.6   | Disable WPS              |
+| P20  | Thermal throttling              | Hardware      | 0.7-0.9   | Tingkatkan ventilasi     |
 
 **Jenis Penyebab:**
+
 - **Hardware**: Kerusakan fisik atau hardware problem
 - **Configuration**: Setting tidak optimal di AP/Router
 - **Software**: Issue firmware atau driver
@@ -114,12 +123,12 @@ CF_combined = 0.92
 
 **Contoh Rules:**
 
-| Rule ID | Antecedents | Consequent | CF | Description |
-|---------|-------------|-----------|----|----|
-| R001 | P01, P03 | G01 | 0.85 | Jarak jauh + channel penuh → WiFi lambat |
-| R002 | P10 | G01 | 0.9 | ISP problem → WiFi lambat |
-| R013 | P13, P14 | G06 | 0.92 | DHCP rusak + IP range penuh → DHCP problem |
-| R015 | P07, P20, P18 | G07 | 0.95 | Overheating + thermal throttling + RAM penuh → AP overheat |
+| Rule ID | Antecedents   | Consequent | CF   | Description                                                |
+| ------- | ------------- | ---------- | ---- | ---------------------------------------------------------- |
+| R001    | P01, P03      | G01        | 0.85 | Jarak jauh + channel penuh → WiFi lambat                   |
+| R002    | P10           | G01        | 0.9  | ISP problem → WiFi lambat                                  |
+| R013    | P13, P14      | G06        | 0.92 | DHCP rusak + IP range penuh → DHCP problem                 |
+| R015    | P07, P20, P18 | G07        | 0.95 | Overheating + thermal throttling + RAM penuh → AP overheat |
 
 **Total: 24 rules** yang menghubungkan penyebab ke gangguan dengan confidence factors
 
@@ -176,6 +185,7 @@ CF_combined = 0.92
 ### Step-by-Step:
 
 **Step 1: Klien Melaporkan Gejala**
+
 ```python
 # Klien melaporkan 2 gejala dengan confidence level
 test_complaints = [
@@ -185,6 +195,7 @@ test_complaints = [
 ```
 
 **Step 2: Mapping Gejala ke Penyebab**
+
 ```
 Gejala: slow_connection (confidence: 0.9)
   → P01 (0.7) = 0.9 × 0.7 = 0.63
@@ -198,6 +209,7 @@ P11 Combination: CF(P11) = 0.72 + 0.765(1-0.72) = 0.72 + 0.2135 = 0.9335
 ```
 
 **Step 3: Forward Chaining**
+
 ```
 Rule R001: IF P01 AND P03 THEN G01 (CF=0.85)
 Rule R002: IF P10 THEN G01 (CF=0.9)
@@ -206,12 +218,14 @@ Rule R003: IF P11 THEN G01 (CF=0.8)
 ```
 
 **Step 4: CF Calculation**
+
 ```
 G01 dari R003: CF(P11) × CF(R003) = 0.9335 × 0.8 = 0.7468
 G10 dari R021: CF(P11) × CF(R021) = 0.9335 × 0.9 = 0.8402
 ```
 
 **Step 5: Report Generation**
+
 ```
 DIAGNOSIS HASIL:
 - G01 (WiFi Lambat): CF = 0.8452 (Confidence: Tinggi)
@@ -227,11 +241,14 @@ ALASAN: Multiple disturbances detected
 ## 💡 TEST CASES
 
 ### Test Case 1: WiFi Lambat + Banyak Device
+
 **Klien Reports:**
+
 - Koneksi internet sangat lambat (Confidence: 0.9)
 - Banyak perangkat terhubung (Confidence: 0.85)
 
 **Expected Diagnosis:**
+
 - G01 (Slow WiFi): CF 0.8452 - Tinggi
 - G10 (Congestion): CF 0.8402 - Tinggi
 - G04 (High Latency): CF 0.7707 - Tinggi
@@ -241,11 +258,14 @@ ALASAN: Multiple disturbances detected
 ---
 
 ### Test Case 2: AP Panas + Putus Koneksi
+
 **Klien Reports:**
+
 - AP panas dan bau hangus (Confidence: 0.95)
 - WiFi sering putus-putus (Confidence: 0.88)
 
 **Expected Diagnosis:**
+
 - G07 (AP Overheating): CF 0.95+ - Sangat Tinggi
 - G02 (Frequent Disconnections): CF 0.85+ - Tinggi
 
@@ -254,11 +274,14 @@ ALASAN: Multiple disturbances detected
 ---
 
 ### Test Case 3: Sinyal Lemah + DNS Issue
+
 **Klien Reports:**
+
 - Sinyal WiFi sangat lemah (Confidence: 0.8)
 - DNS lookup sangat lambat (Confidence: 0.75)
 
 **Expected Diagnosis:**
+
 - G03 (Weak Signal): CF 0.78 - Tinggi
 - G05 (DNS Issue): CF 0.82 - Tinggi
 
@@ -394,31 +417,37 @@ report_generator.save_report('Laporan_Diagnosa.txt', report)
 ## 📊 EXCEL DATABASE REFERENCE
 
 ### Sheet 1: Gangguan
+
 - **10 WiFi disturbances** (G01-G10)
 - Codes, names, descriptions, severity levels
 - Use for symptom mapping
 
 ### Sheet 2: Penyebab
+
 - **20 causes** (P01-P20)
 - CF ranges, type classification
 - Solutions for each cause
 
 ### Sheet 3: Rules
+
 - **24 inference rules** (R001-R024)
 - Links between causes and disturbances
 - CF values for each rule
 
 ### Sheet 4: Symptom Mapping
+
 - **10 symptoms** that clients can report
 - Primary and secondary causes for each symptom
 - Mapping CF values
 
 ### Sheet 5: CF Reference
+
 - **CF Combination Formula**
 - Confidence level interpretation
 - Technician visit decision rules
 
 ### Sheet 6: Documentation
+
 - System overview and methodology
 - Components and workflow description
 - Features and next steps
@@ -428,26 +457,31 @@ report_generator.save_report('Laporan_Diagnosa.txt', report)
 ## ✨ FITUR UTAMA SISTEM
 
 ### ✅ Automated Diagnosis
+
 - Automatic symptom to cause mapping
 - Forward chaining inference
 - Multi-evidence CF combination
 
 ### ✅ Intelligent Decision Making
+
 - CF-based confidence scoring
 - Severity-aware recommendations
 - Technician visit prioritization
 
 ### ✅ Comprehensive Reporting
+
 - Detailed diagnostic reports
 - Root cause analysis
 - Recommended actions
 
 ### ✅ Scalability
+
 - Easy to add new rules
 - Support for new disturbances/causes
 - Modular architecture
 
 ### ✅ Historical Analysis
+
 - Excel import for historical data
 - Pattern recognition capability
 - Empirical CF validation
@@ -457,17 +491,20 @@ report_generator.save_report('Laporan_Diagnosa.txt', report)
 ## 🔮 FUTURE ENHANCEMENTS
 
 ### Phase 1: Validation
+
 - [ ] Validate CF values with real historical data
 - [ ] Fine-tune rule weights based on actual outcomes
 - [ ] Adjust confidence thresholds
 
 ### Phase 2: Integration
+
 - [ ] API endpoint for helpdesk integration
 - [ ] Database backend for data persistence
 - [ ] Web interface for user-friendly input
 - [ ] Mobile app for self-service diagnosis
 
 ### Phase 3: Advanced Features
+
 - [ ] Machine Learning for CF auto-tuning
 - [ ] Time-series analysis for trend detection
 - [ ] Predictive maintenance recommendations
@@ -476,6 +513,7 @@ report_generator.save_report('Laporan_Diagnosa.txt', report)
 - [ ] Performance analytics dashboard
 
 ### Phase 4: AI Enhancement
+
 - [ ] Natural Language Processing (NLP) for free-text complaints
 - [ ] Deep Learning for pattern recognition
 - [ ] Anomaly detection for unusual scenarios
@@ -486,6 +524,7 @@ report_generator.save_report('Laporan_Diagnosa.txt', report)
 ## 📞 SUPPORT & MAINTENANCE
 
 ### Regular Updates Needed
+
 - Monthly: Review new disturbance patterns
 - Quarterly: Validate and adjust CF values
 - Semi-annually: Add new rules based on trends
@@ -494,14 +533,17 @@ report_generator.save_report('Laporan_Diagnosa.txt', report)
 ### Common Issues & Solutions
 
 **Issue: WiFi intermittent, cannot isolate cause**
+
 - Solution: Ask for additional symptoms (time of day, specific devices, etc.)
 - Collect more data before final diagnosis
 
 **Issue: Multiple diagnosis with similar CF values**
+
 - Solution: Recommend broader investigation
 - May require technician visit for physical inspection
 
 **Issue: High CF but issue persists**
+
 - Solution: Collect feedback from technician
 - Update rules and CF values based on actual findings
 
@@ -510,18 +552,21 @@ report_generator.save_report('Laporan_Diagnosa.txt', report)
 ## 📝 NOTES & BEST PRACTICES
 
 ### Data Collection Best Practices
+
 1. Ask for specific symptoms, not vague complaints
 2. Get confidence levels (how sure is the reporter?)
 3. Collect environmental context (time, location, affected users)
 4. Track actual outcomes vs. diagnosis for learning
 
 ### Rule Development Guidelines
+
 1. Rules should have clear cause-effect relationships
 2. CF values should reflect empirical evidence
 3. Complex rules (3+ antecedents) should have high CF threshold
 4. Single antecedent rules can be more liberal
 
 ### System Validation Checklist
+
 - [ ] Does system correctly identify single cause diagnoses?
 - [ ] Can system combine multiple causes logically?
 - [ ] Are technician recommendations appropriate?
@@ -533,15 +578,18 @@ report_generator.save_report('Laporan_Diagnosa.txt', report)
 ## 📚 REFERENCES & FURTHER READING
 
 ### Certainty Factor Theory
+
 - Shortliffe, E.H. & Buchanan, B.G. (1975). A model of inexact reasoning in medicine
 - Based on MYCIN expert system pioneering work
 - CF ranges from -1 to +1 (often 0 to 1 for medical applications)
 
 ### Expert Systems
+
 - Jackson, P. (1998). Introduction to Expert Systems
 - Giarratano & Riley. Expert Systems: Principles and Programming
 
 ### WiFi Troubleshooting Standards
+
 - IEEE 802.11 specifications
 - WiFi Alliance best practices
 - ISP standards and SLAs
@@ -553,12 +601,14 @@ report_generator.save_report('Laporan_Diagnosa.txt', report)
 Sistem ini dilengkapi dengan integrasi webhook untuk mengirim data analisis secara otomatis ke **N8N** workflow automation platform.
 
 ### Fitur Webhook:
+
 - **Automatic Data Transmission**: Data hasil analisis dikirim otomatis ketika user menekan tombol "Cetak"
 - **Structured JSON Payload**: Format data terstandar untuk mudah diproses di N8N
 - **Error Handling**: User-friendly error messages jika webhook gagal
 - **Real-time Feedback**: Success/error notifications di UI
 
 ### Data yang Dikirim:
+
 ```json
 {
   "wifiName": "Nama WiFi",
@@ -576,16 +626,20 @@ Sistem ini dilengkapi dengan integrasi webhook untuk mengirim data analisis seca
 ```
 
 ### Webhook URL:
+
 ```
 http://localhost:5678/webhook-test/netreport
 ```
 
 ### Setup Instructions:
+
 Lihat file dokumentasi lengkap:
+
 - **API Documentation**: [N8N_WEBHOOK_API.md](./N8N_WEBHOOK_API.md)
 - **Setup Guide**: [N8N_SETUP_GUIDE.md](./N8N_SETUP_GUIDE.md)
 
 ### Quick Start:
+
 ```bash
 # 1. Start N8N (menggunakan Docker)
 docker run -it --rm -p 5678:80 n8nio/n8n
@@ -605,7 +659,9 @@ npm run dev
 ```
 
 ### Konfigurasi:
+
 Jika menggunakan N8N di URL berbeda, edit `.env.local`:
+
 ```env
 VITE_N8N_WEBHOOK_URL=https://your-n8n-domain.com/webhook-test/netreport
 ```
@@ -622,4 +678,4 @@ For questions, improvements, or bug reports regarding this WiFi Expert System, p
 
 ---
 
-*End of Documentation*
+_End of Documentation_
